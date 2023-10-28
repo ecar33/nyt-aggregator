@@ -11,7 +11,7 @@ API_SECRET = os.environ.get('API_SECRET')
 
 
 def article_search():
-    filter = ''
+    filter_query = ''
     query = input("Enter a broad query term: ").strip().lower()
 
     filter_query_flag = input("Refine query? (y/n) ").strip().lower()
@@ -20,7 +20,7 @@ def article_search():
         filter_query_flag = input().strip().lower()
 
     if filter_query_flag == 'y':
-        filter = filter_queries()
+        filter_query = filter_queries()
 
     headers = {
         'API-Secret': API_SECRET
@@ -30,9 +30,8 @@ def article_search():
         'api-key': API_KEY
     }
 
-    period = 30
     base_url = "https://api.nytimes.com/svc/search/v2"
-    endpoint = f'/articlesearch.json?q={query}&fq={filter}'
+    endpoint = f'/articlesearch.json?q={query}&fq={filter_query}'
 
     r = requests.get(base_url + endpoint, headers=headers, params=params)
 
@@ -80,12 +79,15 @@ def top_stories_search():
     if r.status_code == 200:
         data = r.json()
 
+
+        # with open("outfile.json", "w") as outfile:
+        #      outfile.write(json.dumps(data, indent=4))
+
         parsed_articles = parse_top_stories(data, article_count)
         print(display_parsed_json(parsed_articles))
         user_select_function()
 
-        # with open("outfile.json", "w") as outfile:
-        #     outfile.write(json.dumps(data, indent=4))
+
 
     else:
         print(f"Something went wrong: {r.text}")
@@ -99,7 +101,7 @@ def bestseller_overview_search():
 
     # Get the date for the GET request
     published_date = input("Enter a date (YYYY-MM-DD): ").strip()
-    pattern = '^\d{4}-\d{2}-\d{2}$'
+    pattern = r'^\d{4}-\d{2}-\d{2}$'
     match = re.fullmatch(pattern, published_date)
 
     while True:
@@ -120,11 +122,13 @@ def bestseller_overview_search():
     r = requests.get(base_url + endpoint, headers=headers, params=params)
 
     if r.status_code == 200:
-        genre_list = []
         data = r.json()
 
         genre_index, genre_choice = get_genre()
         genre = (genre_index, genre_choice)
+
+        with open("outfile.json", "w") as outfile:
+            outfile.write(json.dumps(data, indent=4))
 
         parsed_bestsellers = parse_bestsellers(data, genre)
         print(display_parsed_json(parsed_bestsellers))
@@ -133,8 +137,7 @@ def bestseller_overview_search():
         # print(display_parsed_json(parsed_articles))
         # user_select_function()
         #
-        # with open("outfile.json", "w") as outfile:
-        #     outfile.write(json.dumps(data, indent=4))
+
 
     else:
         print(f"Something went wrong: {r.text}")
@@ -310,7 +313,7 @@ def parse_article_search(data):
 def parse_bestsellers(data, genre: list):
     parsed_json = []
     genre_index = genre[0] - 1
-    if "results" in data:
+    if "results" in data and "lists" in data["results"]:
         for book in data["results"]["lists"][genre_index]["books"]:
             title = book.get("title", None)
             author = book.get("author", None)
@@ -328,6 +331,9 @@ def parse_bestsellers(data, genre: list):
                 "weeks_on_list": weeks_on_list
             }
             parsed_json.append(parsed_book)
+    else:
+        print("No results for the time period selected. Try another.")
+        bestseller_overview_search()
 
     return parsed_json
 
