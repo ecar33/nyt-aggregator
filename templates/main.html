@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>NYT Aggregator Home</title>
+    <!--    <link rel="stylesheet" href="style.css">-->
+</head>
+<body>
+<!--	<script src="index.js"></script>-->
+<h1>NYT Aggregator</h1>
+<p>Select a function from the list: </p>
+
+<form action="/select_function" method="post">
+    <label for="article_search">Article Search</label>
+    <input type="radio" id="article_search" name="choice" value="article_search">
+    <br>
+    <label for="top_stories">Top Stories</label>
+    <input type="radio" id="top_stories" name="choice" value="top_stories">
+    <br>
+    <label for="bestselling_books">Bestselling Books</label>
+    <input type="radio" id="bestselling_books" name="choice" value="bestselling_books">
+    <br>
+    <br>
+    <input type="submit" id="submit">
+</form>
+</body>
+</html>

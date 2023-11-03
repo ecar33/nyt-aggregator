@@ -1,0 +1,25 @@
+.header {
+    font-size: 50px;
+    text-align: center;
+}
+
+.book {
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+.title {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.author {
+    font-style: italic;
+}
+
+.description {
+    margin-top: 10px;
+}
+

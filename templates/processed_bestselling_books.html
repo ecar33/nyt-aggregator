@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bestselling Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/processed_bestselling_books_style.css') }}">
+</head>
+<body>
+<!--	<script src="index.js"></script>-->
+<div class="header">Bestselling Books</div>
+<p>Inputted date: {{ date }}</p>
+<p>Selected genre: {{ genre }}</p>
+{% if books %}
+{% for book in books %}
+<div class="book">
+    <div class="title">Title: {{ book.title }}</div>
+    <div class="author">Author: {{ book.author }}</div>
+    <div class="description">Description: {{ book.description }}</div>
+    <div class="publisher">Publisher: {{ book.publisher }}</div>
+    <div class="rank">Rank: {{ book.rank }}</div>
+</div>
+{% endfor %}
+{% endif %}
+
+
+</body>
+</html>

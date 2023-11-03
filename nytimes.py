@@ -15,7 +15,7 @@ def article_search():
     query = input("Enter a broad query term: ").strip().lower()
 
     filter_query_flag = input("Refine query? (y/n) ").strip().lower()
-    while (filter_query_flag != 'y' and filter_query_flag != 'n'):
+    while filter_query_flag != 'y' and filter_query_flag != 'n':
         print("Please input y/n ")
         filter_query_flag = input().strip().lower()
 
@@ -39,7 +39,7 @@ def article_search():
         data = r.json()
         parsed_json = parse_article_search(data)
 
-        print(display_parsed_json(parsed_json))
+        print(parsed_json_to_string(parsed_json))
         user_select_function()
 
     else:
@@ -79,152 +79,51 @@ def top_stories_search():
     if r.status_code == 200:
         data = r.json()
 
-
-        # with open("outfile.json", "w") as outfile:
-        #      outfile.write(json.dumps(data, indent=4))
-
         parsed_articles = parse_top_stories(data, article_count)
-        print(display_parsed_json(parsed_articles))
-        user_select_function()
-
-
+        return parsed_json_to_string(parsed_articles)
+        # user_select_function()
 
     else:
         print(f"Something went wrong: {r.text}")
         print(r.url)
 
 
-def bestseller_overview_search():
+def bestseller_overview_search(date, genre) -> list:
     headers = {
         'API-Secret': API_SECRET
     }
 
-    # Get the date for the GET request
-    published_date = input("Enter a date (YYYY-MM-DD): ").strip()
-    pattern = r'^\d{4}-\d{2}-\d{2}$'
-    match = re.fullmatch(pattern, published_date)
-
-    while True:
-        if match:
-            break
-        else:
-            published_date = input("Please enter a date in the specified format (YYYY-MM-DD): ").strip()
-            match = re.fullmatch(pattern, published_date)
-
     params = {
-        'api-key': API_KEY,
-        'published_date': published_date
+        "api-key": API_KEY
     }
 
-    base_url = "https://api.nytimes.com/svc/books/v3/lists"
-    endpoint = f'/overview.json'
+    base_url = "https://api.nytimes.com/svc/books"
+    endpoint = f'/v3/lists/{date}/{genre}.json'
 
-    r = requests.get(base_url + endpoint, headers=headers, params=params)
 
-    if r.status_code == 200:
+
+    try:
+        r = requests.get(base_url + endpoint, headers=headers, params=params)
         data = r.json()
 
-        genre_index, genre_choice = get_genre()
-        genre = (genre_index, genre_choice)
+        with open("outfile", "w") as f:
+            f.write(json.dumps(data, indent = 4))
 
-        with open("outfile.json", "w") as outfile:
-            outfile.write(json.dumps(data, indent=4))
+        r.raise_for_status()
 
-        parsed_bestsellers = parse_bestsellers(data, genre)
-        print(display_parsed_json(parsed_bestsellers))
+    except requests.HTTPError as http_err:
+        return None, http_err
 
-        # parsed_articles = parse_top_stories(data, article_count)
-        # print(display_parsed_json(parsed_articles))
-        # user_select_function()
-        #
-
-
+    except Exception as e:
+        return None, e
     else:
-        print(f"Something went wrong: {r.text}")
-        print(r.url)
+        data = r.json()
+        return parse_bestsellers(data), None
 
 
-def get_genre():
-    current_page = 0
-
-    genre_menu = {0: '''
-    Choose a genre from the list or 'p' to page:
-    1. Combined Print and E-Book Fiction
-    2. Combined Print and E-Book Nonfiction
-    3. Hardcover Fiction
-    4. Hardcover Nonfiction
-    5. Trade Fiction Paperback
-    6. Paperback Nonfiction
-    7. Advice How-To and Miscellaneous
-    8. Children's Middle Grade Hardcover
-    9. Picture Books
-    10. Series Books
-    ''',
-                  1: '''
-    Choose a genre from the list or 'p' to page:
-    11. Young Adult Hardcover
-    12. Audio Fiction
-    13. Audio Nonfiction
-    14. Business Books
-    15. Graphic Books and Manga
-    16. Mass Market Monthly
-    17. Middle Grade Paperback Monthly
-    18. Young Adult Paperback Monthly
-    '''}
-
-    genre_choices = {
-        1: "combined-print-and-e-book-fiction",
-        2: "combined-print-and-e-book-nonfiction",
-        3: "hardcover-fiction",
-        4: "hardcover-nonfiction",
-        5: "trade-fiction-paperback",
-        6: "paperback-nonfiction",
-        7: "advice-how-to-and-miscellaneous",
-        8: "childrens-middle-grade-hardcover",
-        9: "picture-books",
-        10: "series-books",
-        11: "young-adult-hardcover",
-        12: "audio-fiction",
-        13: "audio-nonfiction",
-        14: "business-books",
-        15: "graphic-books-and-manga",
-        16: "mass-market-monthly",
-        17: "middle-grade-paperback-monthly",
-        18: "young-adult-paperback-monthly"
-    }
-
-    print(genre_menu[current_page])
-    while True:
-        input_genre_choice = input().strip()
-        try:
-            if input_genre_choice == "p":
-                if current_page == 0:
-                    current_page = 1
-                    print(genre_menu[current_page])
-                elif current_page == 1:
-                    current_page = 0
-                    print(genre_menu[current_page])
-            elif int(input_genre_choice) in range(1, 19):
-
-                genre_choice_index = int(input_genre_choice)
-                return genre_choice_index, genre_choices[int(input_genre_choice)]
-
-            else:
-                print("Please input a valid choice from the list (1-19)\n")
-        except TypeError:
-            print("Please input a valid choice from the list (1-19)\n")
 
 
 def filter_queries():
-    def get_query_terms(prompt):
-        query_terms = input(f"Enter query terms for {prompt} (separated by commas): ").split(",")
-
-        normalized_query = []
-        for term in query_terms:
-            normalized_query.append(re.sub(r'\s+', ' ', term))
-        concatenated_input = " OR ".join([term.strip() for term in normalized_query])
-        return encase_multiword_tokens(concatenated_input)
-
     queries = {
         "body": (),
         "headline": (),
@@ -276,6 +175,16 @@ def filter_queries():
     return lucene_query
 
 
+def get_query_terms(prompt):
+    query_terms = input(f"Enter query terms for {prompt} (separated by commas): ").split(",")
+
+    normalized_query = []
+    for term in query_terms:
+        normalized_query.append(re.sub(r'\s+', ' ', term))
+    concatenated_input = " OR ".join([term.strip() for term in normalized_query])
+    return encase_multiword_tokens(concatenated_input)
+
+
 def encase_multiword_tokens(query):
     tokens = query.split(' OR ')
     processed_tokens = []
@@ -310,32 +219,60 @@ def parse_article_search(data):
     return parsed_json
 
 
-def parse_bestsellers(data, genre: list):
-    parsed_json = []
-    genre_index = genre[0] - 1
-    if "results" in data and "lists" in data["results"]:
-        for book in data["results"]["lists"][genre_index]["books"]:
-            title = book.get("title", None)
-            author = book.get("author", None)
-            description = book.get("description", None)
-            publisher = book.get("publisher", None)
-            rank = book.get("rank", None)
-            weeks_on_list = book.get("weeks_on_list", None)
+def parse_bestsellers(data):
+    books_list = []
+    if "results" in data and "books" in data["results"]:
+        for count, book in enumerate(data["results"]["books"]):
+            if count == 5:
+                break
+            else:
+                title = book.get("title", None)
+                author = book.get("author", None)
+                description = book.get("description", None)
+                publisher = book.get("publisher", None)
+                rank = book.get("rank", None)
 
-            parsed_book = {
-                "title": title,
-                "author": author,
-                "description": description,
-                "publisher": publisher,
-                "rank": rank,
-                "weeks_on_list": weeks_on_list
-            }
-            parsed_json.append(parsed_book)
-    else:
-        print("No results for the time period selected. Try another.")
-        bestseller_overview_search()
+                book_map = {
+                    "title": title,
+                    "author": author,
+                    "description": description,
+                    "publisher": publisher,
+                    "rank": rank,
+                }
+                books_list.append(book_map)
 
-    return parsed_json
+    return books_list
+
+
+# def parse_bestsellers_overview(data, genre_index):
+#     parsed_json = []
+#     genre_index = genre_index - 1
+#     if "results" in data and "lists" in data["results"]:
+#         for book in data["results"]["lists"][genre_index]["books"]:
+#             title = book.get("title", None)
+#             author = book.get("author", None)
+#             description = book.get("description", None)
+#             publisher = book.get("publisher", None)
+#             rank = book.get("rank", None)
+#             weeks_on_list = book.get("weeks_on_list", None)
+#
+#             parsed_book = {
+#                 "title": title,
+#                 "author": author,
+#                 "description": description,
+#                 "publisher": publisher,
+#                 "rank": rank,
+#                 "weeks_on_list": weeks_on_list
+#             }
+# #
+# #             filtered_book = {k: v for k, v in parsed_book.items() if v}
+# #             parsed_json.append(filtered_book)
+#
+#
+#     else:
+#         return None
+#
+#     return parsed_json
 
 
 def parse_top_stories(data, article_count):
@@ -362,7 +299,7 @@ def parse_top_stories(data, article_count):
     return parsed_json
 
 
-def display_parsed_json(parsed_json):
+def parsed_json_to_string(parsed_json):
     display_string = ''
     for item in parsed_json:
         for key, value in item.items():
@@ -379,9 +316,9 @@ def user_select_function():
     2. Top Stories
     3. Bestselling Books
     ''')
-    user_select_function = input().strip().lower()
+    user_selection = input().strip().lower()
 
-    match user_select_function:
+    match user_selection:
         case '1':
             article_search()
         case '2':
@@ -395,10 +332,10 @@ def user_select_function():
 
 
 def main():
-    print(r"""   _  ___  ________  ___                              __          
+    print(r"""   _  ___  ________  ___                              __
   / |/ | \/ /_  __/ / _ |___ ____ ________ ___ ____ _/ /____  ____
  /    / \  / / /   / __ / _ `/ _ `/ __/ -_) _ `/ _ `/ __/ _ \/ __/
-/_/|_/  /_/ /_/   /_/ |_\_, /\_, /_/  \__/\_, /\_,_/\__/\___/_/   
+/_/|_/  /_/ /_/   /_/ |_\_, /\_, /_/  \__/\_, /\_,_/\__/\___/_/
                        /___//___/        /___/                    """)
 
     user_select_function()

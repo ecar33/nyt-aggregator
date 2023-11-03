@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Bestselling Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bestselling_books_style.css') }}">
+</head>
+<body>
+<!--<script src="{{url_for('static', filename='bestselling_books.js')}}"></script>-->
+{% if error %}
+<p>An error has occurred: {{ error }}</p>
+{% endif %}
+
+{% if empty %}
+<p>Please input a correct date and genre.</p>
+{% endif %}
+
+<div class="header">Bestselling Books</div>
+
+<form action="/process_bestselling_books" method="post" class="input_form">
+    <label for="date">Input a date or type "current" for the latest list (YYYY-MM-DD): </label>
+    <br>
+    <input type="text" id="date" name="date" value="">
+    <br>
+
+    <p>Select a genre from the list: </p>
+    <input type="radio" id="combined-print-and-e-book-fiction" name="genre" value="combined-print-and-e-book-fiction">
+    <label for="combined-print-and-e-book-fiction">Combined Print and E-Book Fiction</label>
+    <br>
+    <input type="radio" id="combined-print-and-e-book-nonfiction" name="genre"
+           value="combined-print-and-e-book-nonfiction">
+    <label for="combined-print-and-e-book-nonfiction">Combined Print and E-Book Nonfiction</label>
+    <br>
+    <input type="radio" id="hardcover-fiction" name="genre" value="hardcover-fiction">
+    <label for="hardcover-fiction">Hardcover Fiction</label>
+    <br>
+    <input type="radio" id="hardcover-nonfiction" name="genre" value="hardcover-nonfiction">
+    <label for="hardcover-nonfiction">Hardcover Nonfiction</label>
+    <br>
+    <input type="radio" id="trade-fiction-paperback" name="genre" value="trade-fiction-paperback">
+    <label for="trade-fiction-paperback">Trade Fiction Paperback</label>
+    <br>
+    <input type="radio" id="mass-market-paperback" name="genre" value="mass-market-paperback">
+    <label for="mass-market-paperback">Mass Market Paperback</label>
+    <br>
+    <input type="radio" id="paperback-nonfiction" name="genre" value="paperback-nonfiction">
+    <label for="paperback-nonfiction">Paperback Nonfiction</label>
+    <br>
+    <input type="radio" id="e-book-fiction" name="genre" value="e-book-fiction">
+    <label for="e-book-fiction">E-Book Fiction</label>
+    <br>
+    <input type="radio" id="e-book-nonfiction" name="genre" value="e-book-nonfiction">
+    <label for="e-book-nonfiction">E-Book Nonfiction</label>
+    <br>
+    <input type="radio" id="hardcover-advice" name="genre" value="hardcover-advice">
+    <label for="hardcover-advice">Hardcover Advice</label>
+    <br>
+    <input type="radio" id="paperback-advice" name="genre" value="paperback-advice">
+    <label for="paperback-advice">Paperback Advice</label>
+    <br>
+    <input type="radio" id="advice-how-to-and-miscellaneous" name="genre" value="advice-how-to-and-miscellaneous">
+    <label for="advice-how-to-and-miscellaneous">Advice How-To and Miscellaneous</label>
+    <br>
+    <input type="radio" id="hardcover-graphic-books" name="genre" value="hardcover-graphic-books">
+    <label for="hardcover-graphic-books">Hardcover Graphic Books</label>
+    <br>
+    <input type="radio" id="paperback-graphic-books" name="genre" value="paperback-graphic-books">
+    <label for="paperback-graphic-books">Paperback Graphic Books</label>
+    <br>
+    <input type="radio" id="manga" name="genre" value="manga">
+    <label for="manga">Manga</label>
+    <br>
+    <input type="radio" id="combined-print-fiction" name="genre" value="combined-print-fiction">
+    <label for="combined-print-fiction">Combined Print Fiction</label>
+    <br>
+    <input type="radio" id="combined-print-nonfiction" name="genre" value="combined-print-nonfiction">
+    <label for="combined-print-nonfiction">Combined Print Nonfiction</label>
+    <br>
+    <input type="radio" id="chapter-books" name="genre" value="chapter-books">
+    <label for="chapter-books">Chapter Books</label>
+    <br>
+    <input type="radio" id="childrens-middle-grade" name="genre" value="childrens-middle-grade">
+    <label for="childrens-middle-grade">Childrens Middle Grade</label>
+    <br>
+    <input type="radio" id="childrens-middle-grade-e-book" name="genre" value="childrens-middle-grade-e-book">
+    <label for="childrens-middle-grade-e-book">Childrens Middle Grade E-Book</label>
+    <br>
+    <input type="radio" id="childrens-middle-grade-hardcover" name="genre" value="childrens-middle-grade-hardcover">
+    <label for="childrens-middle-grade-hardcover">Childrens Middle Grade Hardcover</label>
+    <br>
+    <input type="radio" id="childrens-middle-grade-paperback" name="genre" value="childrens-middle-grade-paperback">
+    <label for="childrens-middle-grade-paperback">Childrens Middle Grade Paperback</label>
+    <br>
+    <input type="radio" id="paperback-books" name="genre" value="paperback-books">
+    <label for="paperback-books">Paperback Books</label>
+    <br>
+    <input type="radio" id="picture-books" name="genre" value="picture-books">
+    <label for="picture-books">Picture Books</label>
+    <br>
+    <input type="radio" id="series-books" name="genre" value="series-books">
+    <label for="series-books">Series Books</label>
+    <br>
+    <input type="radio" id="young-adult" name="genre" value="young-adult">
+    <label for="young-adult">Young Adult</label>
+    <br>
+    <input type="radio" id="young-adult-e-book" name="genre" value="young-adult-e-book">
+    <label for="young-adult-e-book">Young Adult E-Book</label>
+    <br>
+    <input type="radio" id="young-adult-hardcover" name="genre" value="young-adult-hardcover">
+    <label for="young-adult-hardcover">Young Adult Hardcover</label>
+    <br>
+    <input type="radio" id="young-adult-paperback" name="genre" value="young-adult-paperback">
+    <label for="young-adult-paperback">Young Adult Paperback</label>
+    <br>
+    <input type="radio" id="animals" name="genre" value="animals">
+    <label for="animals">Animals</label>
+    <br>
+    <input type="radio" id="audio-fiction" name="genre" value="audio-fiction">
+    <label for="audio-fiction">Audio Fiction</label>
+    <br>
+    <input type="radio" id="audio-nonfiction" name="genre" value="audio-nonfiction">
+    <label for="audio-nonfiction">Audio Nonfiction</label>
+    <br>
+    <input type="radio" id="business-books" name="genre" value="business-books">
+    <label for="business-books">Business Books</label>
+    <br>
+    <input type="radio" id="celebrities" name="genre" value="celebrities">
+    <label for="celebrities">Celebrities</label>
+    <br>
+    <input type="radio" id="crime-and-punishment" name="genre" value="crime-and-punishment">
+    <label for="crime-and-punishment">Crime and Punishment</label>
+    <br>
+    <input type="radio" id="culture" name="genre" value="culture">
+    <label for="culture">Culture</label>
+    <br>
+    <input type="radio" id="education" name="genre" value="education">
+    <label for="education">Education</label>
+    <br>
+    <input type="radio" id="espionage" name="genre" value="espionage">
+    <label for="espionage">Espionage</label>
+    <br>
+    <input type="radio" id="expeditions-disasters-and-adventures" name="genre"
+           value="expeditions-disasters-and-adventures">
+    <label for="expeditions-disasters-and-adventures">Expeditions Disasters and Adventures</label>
+    <br>
+    <input type="radio" id="fashion-manners-and-customs" name="genre" value="fashion-manners-and-customs">
+    <label for="fashion-manners-and-customs">Fashion Manners and Customs</label>
+    <br>
+    <input type="radio" id="food-and-fitness" name="genre" value="food-and-fitness">
+    <label for="food-and-fitness">Food and Fitness</label>
+    <br>
+    <input type="radio" id="games-and-activities" name="genre" value="games-and-activities">
+    <label for="games-and-activities">Games and Activities</label>
+    <br>
+    <input type="radio" id="graphic-books-and-manga" name="genre" value="graphic-books-and-manga">
+    <label for="graphic-books-and-manga">Graphic Books and Manga</label>
+    <br>
+    <input type="radio" id="hardcover-business-books" name="genre" value="hardcover-business-books">
+    <label for="hardcover-business-books">Hardcover Business Books</label>
+    <br>
+    <input type="radio" id="health" name="genre" value="health">
+    <label for="health">Health</label>
+    <br>
+    <input type="radio" id="humor" name="genre" value="humor">
+    <label for="humor">Humor</label>
+    <br>
+    <input type="radio" id="indigenous-americans" name="genre" value="indigenous-americans">
+    <label for="indigenous-americans">Indigenous Americans</label>
+    <br>
+    <input type="radio" id="relationships" name="genre" value="relationships">
+    <label for="relationships">Relationships</label>
+    <br>
+    <input type="radio" id="mass-market-monthly" name="genre" value="mass-market-monthly">
+    <label for="mass-market-monthly">Mass Market Monthly</label>
+    <br>
+    <input type="radio" id="middle-grade-paperback-monthly" name="genre" value="middle-grade-paperback-monthly">
+    <label for="middle-grade-paperback-monthly">Middle Grade Paperback Monthly</label>
+    <br>
+    <input type="radio" id="paperback-business-books" name="genre" value="paperback-business-books">
+    <label for="paperback-business-books">Paperback Business Books</label>
+    <br>
+    <input type="radio" id="family" name="genre" value="family">
+    <label for="family">Family</label>
+    <br>
+    <input type="radio" id="hardcover-political-books" name="genre" value="hardcover-political-books">
+    <label for="hardcover-political-books">Hardcover Political Books</label>
+    <br>
+    <input type="radio" id="race-and-civil-rights" name="genre" value="race-and-civil-rights">
+    <label for="race-and-civil-rights">Race and Civil Rights</label>
+    <br>
+    <input type="radio" id="religion-spirituality-and-faith" name="genre" value="religion-spirituality-and-faith">
+    <label for="religion-spirituality-and-faith">Religion Spirituality and Faith</label>
+    <br>
+    <input type="radio" id="science" name="genre" value="science">
+    <label for="science">Science</label>
+    <br>
+    <input type="radio" id="sports" name="genre" value="sports">
+    <label for="sports">Sports</label>
+    <br>
+    <input type="radio" id="travel" name="genre" value="travel">
+    <label for="travel">Travel</label>
+    <br>
+    <input type="radio" id="young-adult-paperback-monthly" name="genre" value="young-adult-paperback-monthly">
+    <label for="young-adult-paperback-monthly">Young Adult Paperback Monthly</label>
+    <br>
+    <input type="submit" id="submit">
+</form>
+
+
+</body>
+</html>
